@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "../config/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth"; // Importar signOut
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../config/firebase";  // Asegúrate de tener una instancia de Firestore importada
+import { db } from "../config/firebase";
 
 const AuthContext = createContext();
 
@@ -13,7 +13,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Obtén los datos del usuario desde Firestore, incluyendo el rol
         const userDoc = doc(db, "users", user.uid);
         const userSnap = await getDoc(userDoc);
         if (userSnap.exists()) {
@@ -30,8 +29,20 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
+  // Función para cerrar sesión
+  const logout = () => {
+    signOut(auth)
+      .then(() => {
+        setCurrentUser(null);
+        console.log("Sesión cerrada con éxito");
+      })
+      .catch((error) => {
+        console.error("Error al cerrar sesión: ", error);
+      });
+  };
+
   return (
-    <AuthContext.Provider value={{ currentUser }}>
+    <AuthContext.Provider value={{ currentUser, logout }}>
       {!loading && children}
     </AuthContext.Provider>
   );

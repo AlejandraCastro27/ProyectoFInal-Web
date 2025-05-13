@@ -1,32 +1,16 @@
-// src/services/projectService.js
-import { db } from "../config/firebase";
-import {
-  collection,
-  addDoc,
-  getDocs,
-  doc,
-  updateDoc,
-  deleteDoc
-} from "firebase/firestore";
+// projectService.js
 
-const projectsRef = collection(db, "projects");
+import { db } from '../config/firebase';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
-export const createProject = async (project) => {
-  const docRef = await addDoc(projectsRef, project);
-  return docRef.id;
+// Crear proyecto
+export const createProject = async (projectData) => {
+  const projectRef = doc(db, 'projects', projectData.titulo);
+  await setDoc(projectRef, projectData);
 };
 
-export const getProjects = async () => {
-  const snapshot = await getDocs(projectsRef);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-};
-
-export const updateProject = async (id, updatedData) => {
-  const projectDoc = doc(db, "projects", id);
-  await updateDoc(projectDoc, updatedData);
-};
-
-export const deleteProject = async (id) => {
-  const projectDoc = doc(db, "projects", id);
-  await deleteDoc(projectDoc);
+// Obtener un proyecto
+export const getProject = async (projectId) => {
+  const projectDoc = await getDoc(doc(db, 'projects', projectId));
+  return projectDoc.data();
 };

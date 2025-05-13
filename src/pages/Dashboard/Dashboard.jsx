@@ -17,8 +17,12 @@ export default function Dashboard() {
       <Navbar />
       <main className="dashboard-content">
         <h1>Bienvenido, {currentUser.email}</h1>
-        {isCoordinador && <p>Acceso completo a la gestión de usuarios y proyectos.</p>}
-        {isDocente && <p>Acceso a la creación de proyectos escolares y seguimiento.</p>}
+        {isCoordinador && (
+          <p>Acceso completo a la gestión de usuarios y proyectos.</p>
+        )}
+        {isDocente && (
+          <p>Acceso a la creación de proyectos escolares y seguimiento.</p>
+        )}
         <button onClick={logout} className="logout-btn">
           Cerrar Sesión
         </button>
