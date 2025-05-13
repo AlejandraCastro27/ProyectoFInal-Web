@@ -29,8 +29,7 @@ export default function Navbar() {
               {showDropdown && (
                 <ul className="dropdown-menu">
                   <li><Link to="/projects/create">Crear Proyecto</Link></li>
-                  <li><Link to="/projects/edit">Editar Proyecto</Link></li>
-                  <li><Link to="/projects/delete">Eliminar Proyecto</Link></li>
+                
                 </ul>
               )}
             </li>

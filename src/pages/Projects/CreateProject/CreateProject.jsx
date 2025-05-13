@@ -19,7 +19,8 @@ const CreateProject = () => {
     inicio: "",
     fin: "",
     hitos: [{ nombre: "", fecha: "" }],
-    observaciones: ""
+    observaciones: "",
+    miembros: [{ userId: "", role: "docente" }]  // Nuevos miembros
   });
 
   const handleChange = (e) => {
@@ -53,6 +54,20 @@ const CreateProject = () => {
     }));
   };
 
+  // Manejo de miembros
+  const handleMiembroChange = (index, key, value) => {
+    const nuevosMiembros = [...form.miembros];
+    nuevosMiembros[index][key] = value;
+    setForm({ ...form, miembros: nuevosMiembros });
+  };
+
+  const addMiembro = () => {
+    setForm((prev) => ({
+      ...prev,
+      miembros: [...prev.miembros, { userId: "", role: "docente" }]
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -78,6 +93,7 @@ const CreateProject = () => {
         estado: "formulacion",
         fechaCreacion: Timestamp.now(),
         observaciones: form.observaciones,
+        miembros: form.miembros, // Agregar los miembros al proyecto
       };
 
       await addDoc(collection(db, "projects"), proyecto);
@@ -92,7 +108,8 @@ const CreateProject = () => {
         inicio: "",
         fin: "",
         hitos: [{ nombre: "", fecha: "" }],
-        observaciones: ""
+        observaciones: "",
+        miembros: [{ userId: "", role: "docente" }],
       });
     } catch (error) {
       console.error("Error al crear proyecto:", error);
@@ -159,6 +176,28 @@ const CreateProject = () => {
         ))}
         <button type="button" onClick={addHito}>
           + Añadir hito
+        </button>
+
+        <label>Miembros</label>
+        {form.miembros.map((miembro, index) => (
+          <div key={index}>
+            <input
+              type="text"
+              placeholder="ID del miembro"
+              value={miembro.userId}
+              onChange={(e) => handleMiembroChange(index, "userId", e.target.value)}
+            />
+            <select
+              value={miembro.role}
+              onChange={(e) => handleMiembroChange(index, "role", e.target.value)}
+            >
+              <option value="docente">Docente</option>
+              <option value="estudiante">Estudiante</option>
+            </select>
+          </div>
+        ))}
+        <button type="button" onClick={addMiembro}>
+          + Añadir miembro
         </button>
 
         <label>Observaciones</label>
