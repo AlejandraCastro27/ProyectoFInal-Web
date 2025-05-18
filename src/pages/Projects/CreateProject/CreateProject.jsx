@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
-import { db } from "../../../config/firebase";
+import { db, storage } from "../../../config/firebase";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "./CreateProject.css";
 
 const CreateProject = () => {
@@ -18,9 +19,9 @@ const CreateProject = () => {
     presupuesto: "",
     inicio: "",
     fin: "",
-    hitos: [{ nombre: "", fecha: "" }],
+    hitos: [{ nombre: "", fecha: "", imagen: null, documento: null }],
     observaciones: "",
-    miembros: [{ userId: "", role: "docente" }]  // Nuevos miembros
+    miembros: [{ userId: "", role: "docente" }],
   });
 
   const handleChange = (e) => {
@@ -37,7 +38,7 @@ const CreateProject = () => {
   const addObjetivoEspecifico = () => {
     setForm((prev) => ({
       ...prev,
-      objetivosEspecificos: [...prev.objetivosEspecificos, ""]
+      objetivosEspecificos: [...prev.objetivosEspecificos, ""],
     }));
   };
 
@@ -50,11 +51,18 @@ const CreateProject = () => {
   const addHito = () => {
     setForm((prev) => ({
       ...prev,
-      hitos: [...prev.hitos, { nombre: "", fecha: "" }]
+      hitos: [...prev.hitos, { nombre: "", fecha: "", imagen: null, documento: null }],
     }));
   };
 
-  // Manejo de miembros
+  const handleFileChange = (index, fileType, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const nuevos = [...form.hitos];
+    nuevos[index][fileType] = file;
+    setForm({ ...form, hitos: nuevos });
+  };
+
   const handleMiembroChange = (index, key, value) => {
     const nuevosMiembros = [...form.miembros];
     nuevosMiembros[index][key] = value;
@@ -64,7 +72,7 @@ const CreateProject = () => {
   const addMiembro = () => {
     setForm((prev) => ({
       ...prev,
-      miembros: [...prev.miembros, { userId: "", role: "docente" }]
+      miembros: [...prev.miembros, { userId: "", role: "docente" }],
     }));
   };
 
@@ -72,6 +80,41 @@ const CreateProject = () => {
     e.preventDefault();
 
     try {
+      const hitosWithFiles = await Promise.all(
+        form.hitos.map(async (hito, index) => {
+          let imagenUrl = null;
+          let documentoUrl = null;
+
+          if (hito.imagen) {
+            const ext = hito.imagen.name.split(".").pop().toLowerCase();
+            const allowedImg = ["jpg", "jpeg", "png", "webp", "svg"];
+            if (!allowedImg.includes(ext)) {
+              throw new Error(`Formato de imagen no permitido en el hito ${index + 1}.`);
+            }
+            const imagenRef = ref(storage, `hitos/${Date.now()}_${hito.imagen.name}`);
+            await uploadBytes(imagenRef, hito.imagen);
+            imagenUrl = await getDownloadURL(imagenRef);
+          }
+
+          if (hito.documento) {
+            const ext = hito.documento.name.split(".").pop().toLowerCase();
+            const allowedDoc = ["pdf", "docx", "doc", "pptx", "ppt"];
+            if (!allowedDoc.includes(ext)) {
+              throw new Error(`Formato de documento no permitido en el hito ${index + 1}.`);
+            }
+            const documentoRef = ref(storage, `hitos/${Date.now()}_${hito.documento.name}`);
+            await uploadBytes(documentoRef, hito.documento);
+            documentoUrl = await getDownloadURL(documentoRef);
+          }
+
+          return {
+            ...hito,
+            imagen: imagenUrl,
+            documento: documentoUrl,
+          };
+        })
+      );
+
       const proyecto = {
         titulo: form.titulo,
         area: form.area,
@@ -82,9 +125,11 @@ const CreateProject = () => {
         cronograma: {
           inicio: Timestamp.fromDate(new Date(form.inicio)),
           fin: Timestamp.fromDate(new Date(form.fin)),
-          hitos: form.hitos.map((h) => ({
+          hitos: hitosWithFiles.map((h) => ({
             nombre: h.nombre,
             fecha: Timestamp.fromDate(new Date(h.fecha)),
+            imagen: h.imagen,
+            documento: h.documento,
           })),
         },
         presupuesto: Number(form.presupuesto),
@@ -93,10 +138,11 @@ const CreateProject = () => {
         estado: "formulacion",
         fechaCreacion: Timestamp.now(),
         observaciones: form.observaciones,
-        miembros: form.miembros, // Agregar los miembros al proyecto
+        miembros: form.miembros,
       };
 
       await addDoc(collection(db, "projects"), proyecto);
+
       alert("Proyecto creado exitosamente.");
       setForm({
         titulo: "",
@@ -107,13 +153,13 @@ const CreateProject = () => {
         presupuesto: "",
         inicio: "",
         fin: "",
-        hitos: [{ nombre: "", fecha: "" }],
+        hitos: [{ nombre: "", fecha: "", imagen: null, documento: null }],
         observaciones: "",
         miembros: [{ userId: "", role: "docente" }],
       });
     } catch (error) {
       console.error("Error al crear proyecto:", error);
-      alert("Error al crear el proyecto");
+      alert(`Error al crear el proyecto: ${error.message}`);
     }
   };
 
@@ -172,6 +218,10 @@ const CreateProject = () => {
               value={hito.fecha}
               onChange={(e) => handleHitoChange(index, "fecha", e.target.value)}
             />
+            <label>Imagen</label>
+            <input type="file" accept="image/*" onChange={(e) => handleFileChange(index, "imagen", e)} />
+            <label>Documento</label>
+            <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" onChange={(e) => handleFileChange(index, "documento", e)} />
           </div>
         ))}
         <button type="button" onClick={addHito}>
