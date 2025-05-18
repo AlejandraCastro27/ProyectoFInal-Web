@@ -17,43 +17,32 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Link to="/">Proyectos Escolares</Link>
+        <div>Proyectos Escolares</div>
       </div>
 
       <ul className="navbar-links">
-        {/* Visible para Coordinador */}
+        {/* Opciones específicas para Coordinador */}
         {isCoordinador && (
           <>
-            <li className="dropdown">
-              <button onClick={toggleDropdown} className="dropdown-toggle">Editar Proyectos ▾</button>
-              {showDropdown && (
-                <ul className="dropdown-menu">
-                  <li><Link to="/projects/create">Crear Proyecto</Link></li>
-                
-                </ul>
-              )}
-            </li>
-            <li><Link to="/projects">Proyectos</Link></li>
-            <li><Link to="/user-management">Gestión de Usuarios</Link></li>
-            <li><Link to="/reports">Reportes</Link></li>
-          </>
-        )}
-
-        {/* Visible para Docente */}
-        {isDocente && (
-          <>
             <li><Link to="/projects/create">Crear Proyecto</Link></li>
-            <li><Link to="/projects">Mis Proyectos</Link></li>
+            <li><Link to="/user-management">Gestión de Usuarios</Link></li>
           </>
         )}
 
-        {/* Común */}
-        <li><Link to="/dashboard">Dashboard</Link></li>
+        {/* Opción específica para Docente */}
+        {isDocente && (
+          <li><Link to="/projects/create">Crear Proyecto</Link></li>
+        )}
 
+        {/* Accesible para cualquier usuario autenticado */}
         {currentUser && (
-          <li>
-            <button onClick={logout} className="logout-btn">Cerrar Sesión</button>
-          </li>
+          <>
+            <li><Link to="/projects">Proyectos</Link></li>
+            <li><Link to="/reports">Reportes</Link></li>
+            <li>
+              <button onClick={logout} className="logout-btn">Cerrar Sesión</button>
+            </li>
+          </>
         )}
       </ul>
     </nav>
