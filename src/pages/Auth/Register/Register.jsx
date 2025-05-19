@@ -104,8 +104,6 @@ export default function Register() {
         <select value={rol} onChange={(e) => setRol(e.target.value)} required>
           <option value="">Selecciona un rol</option>
           <option value="estudiante">Estudiante</option>
-          <option value="docente">Docente</option>
-          <option value="coordinador">Coordinador</option>
         </select>
         {rol === 'estudiante' && (
           <input

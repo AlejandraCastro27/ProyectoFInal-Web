@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
+import React, { useState, useEffect } from "react";
+import { collection, addDoc, Timestamp, getDocs } from "firebase/firestore";
 import { db, storage } from "../../../config/firebase";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +10,10 @@ const CreateProject = () => {
   const { currentUser } = useAuthContext();
   const navigate = useNavigate();
 
+  // Estado para usuarios cargados de Firestore
+  const [usuarios, setUsuarios] = useState([]);
+
+  // Estado del formulario
   const [form, setForm] = useState({
     titulo: "",
     area: "",
@@ -21,9 +25,31 @@ const CreateProject = () => {
     fin: "",
     hitos: [{ nombre: "", fecha: "", imagen: null, documento: null }],
     observaciones: "",
-    miembros: [{ userId: "", role: "docente" }],
+    miembros: [{ userId: "", rol: "docente" }],
   });
 
+  // Cargar usuarios con su rol al montar el componente
+  useEffect(() => {
+    const fetchUsuarios = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "users"));
+        const listaUsuarios = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            nombre: data.nombre || data.email || "Usuario sin nombre",
+            rol: data.rol ? data.rol : "estudiante", // Si no tiene rol, asignamos estudiante
+          };
+        });
+        setUsuarios(listaUsuarios);
+      } catch (error) {
+        console.error("Error al obtener usuarios:", error);
+      }
+    };
+    fetchUsuarios();
+  }, []);
+
+  // Manejadores de cambios del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -72,7 +98,7 @@ const CreateProject = () => {
   const addMiembro = () => {
     setForm((prev) => ({
       ...prev,
-      miembros: [...prev.miembros, { userId: "", role: "docente" }],
+      miembros: [...prev.miembros, { userId: "", rol: "docente" }],
     }));
   };
 
@@ -80,6 +106,7 @@ const CreateProject = () => {
     e.preventDefault();
 
     try {
+      // Subir archivos y obtener URLs
       const hitosWithFiles = await Promise.all(
         form.hitos.map(async (hito, index) => {
           let imagenUrl = null;
@@ -115,6 +142,7 @@ const CreateProject = () => {
         })
       );
 
+      // Crear objeto proyecto para Firestore
       const proyecto = {
         titulo: form.titulo,
         area: form.area,
@@ -155,7 +183,7 @@ const CreateProject = () => {
         fin: "",
         hitos: [{ nombre: "", fecha: "", imagen: null, documento: null }],
         observaciones: "",
-        miembros: [{ userId: "", role: "docente" }],
+        miembros: [{ userId: "", rol: "docente" }],
       });
     } catch (error) {
       console.error("Error al crear proyecto:", error);
@@ -178,7 +206,12 @@ const CreateProject = () => {
         <input name="area" value={form.area} onChange={handleChange} required />
 
         <label>Objetivo General</label>
-        <textarea name="objetivoGeneral" value={form.objetivoGeneral} onChange={handleChange} required />
+        <textarea
+          name="objetivoGeneral"
+          value={form.objetivoGeneral}
+          onChange={handleChange}
+          required
+        />
 
         <label>Objetivos Específicos</label>
         {form.objetivosEspecificos.map((obj, index) => (
@@ -197,7 +230,13 @@ const CreateProject = () => {
         <input name="institucion" value={form.institucion} onChange={handleChange} required />
 
         <label>Presupuesto (COP)</label>
-        <input type="number" name="presupuesto" value={form.presupuesto} onChange={handleChange} required />
+        <input
+          type="number"
+          name="presupuesto"
+          value={form.presupuesto}
+          onChange={handleChange}
+          required
+        />
 
         <label>Fecha de Inicio</label>
         <input type="date" name="inicio" value={form.inicio} onChange={handleChange} required />
@@ -219,41 +258,66 @@ const CreateProject = () => {
               onChange={(e) => handleHitoChange(index, "fecha", e.target.value)}
             />
             <label>Imagen</label>
-            <input type="file" accept="image/*" onChange={(e) => handleFileChange(index, "imagen", e)} />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleFileChange(index, "imagen", e)}
+            />
             <label>Documento</label>
-            <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" onChange={(e) => handleFileChange(index, "documento", e)} />
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx,.ppt,.pptx"
+              onChange={(e) => handleFileChange(index, "documento", e)}
+            />
           </div>
         ))}
         <button type="button" onClick={addHito}>
-          + Añadir hito
-        </button>
-
-        <label>Miembros</label>
-        {form.miembros.map((miembro, index) => (
-          <div key={index}>
-            <input
-              type="text"
-              placeholder="ID del miembro"
-              value={miembro.userId}
-              onChange={(e) => handleMiembroChange(index, "userId", e.target.value)}
-            />
-            <select
-              value={miembro.role}
-              onChange={(e) => handleMiembroChange(index, "role", e.target.value)}
-            >
-              <option value="docente">Docente</option>
-              <option value="estudiante">Estudiante</option>
-            </select>
-          </div>
-        ))}
-        <button type="button" onClick={addMiembro}>
-          + Añadir miembro
+          + Añadir Hito
         </button>
 
         <label>Observaciones</label>
-        <textarea name="observaciones" value={form.observaciones} onChange={handleChange} />
+        <textarea
+          name="observaciones"
+          value={form.observaciones}
+          onChange={handleChange}
+        />
 
-        <button type="submit">Guardar Proyecto</button>
+        <label>Miembros</label>
+        {form.miembros.map((miembro, index) => {
+          // Filtrar usuarios por rol del miembro
+          const usuariosFiltrados = usuarios.filter((u) => u.rol === miembro.rol);
+
+          return (
+            <div key={index} style={{ marginBottom: "10px" }}>
+              <select
+                value={miembro.userId}
+                onChange={(e) => handleMiembroChange(index, "userId", e.target.value)}
+                required
+              >
+                <option value="">Seleccione un usuario</option>
+                {usuariosFiltrados.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.nombre} ({u.rol})
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={miembro.rol}
+                onChange={(e) => handleMiembroChange(index, "rol", e.target.value)}
+                style={{ marginLeft: "10px" }}
+              >
+                <option value="docente">Docente</option>
+                <option value="estudiante">Estudiante</option>
+              </select>
+            </div>
+          );
+        })}
+        <button type="button" onClick={addMiembro}>
+          + Añadir Miembro
+        </button>
+
+        <button type="submit">Crear Proyecto</button>
       </form>
     </div>
   );
