@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc, updateDoc, deleteDoc, Timestamp } from "firebase/firestore";
+import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../../config/firebase";
+import "./ProjectDetail.css"; // Asegúrate de que esta ruta sea correcta
 
 const ProjectDetail = ({ rol = "docente" }) => {
   const { id } = useParams();
@@ -64,11 +65,10 @@ const ProjectDetail = ({ rol = "docente" }) => {
   if (!proyecto) return <p>Cargando...</p>;
 
   return (
-    <div>
-      <button onClick={() => navigate("/projects")}>← Volver</button>
+    <div className="project-detail">
+      <button className="back-button" onClick={() => navigate("/projects")}>← Volver</button>
 
       {editando ? (
-        // Tu sección de edición NO SE TOCA
         <div>
           <h3>Editando Proyecto</h3>
           <input name="titulo" value={form.titulo || ""} onChange={handleChange} />
@@ -113,7 +113,6 @@ const ProjectDetail = ({ rol = "docente" }) => {
 
           <p><strong>Observaciones:</strong> {proyecto.observaciones}</p>
 
-          {/* Mostrar los miembros aquí */}
           <div>
             <strong>Miembros:</strong>
             <ul>

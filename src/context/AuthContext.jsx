@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "../config/firebase";
-import { onAuthStateChanged, signOut } from "firebase/auth"; // Importar signOut
+import { onAuthStateChanged, signOut } from "firebase/auth"; 
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 
@@ -11,25 +11,30 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const userDoc = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userDoc);
-        if (userSnap.exists()) {
-          setCurrentUser({ ...user, rol: userSnap.data().rol });
-        } else {
-          console.error("No se encontraron los datos del usuario");
-        }
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const userDoc = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userDoc);
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        setCurrentUser({
+          uid: user.uid,
+          email: user.email,
+          ...userData, 
+        });
       } else {
-        setCurrentUser(null);
+        console.error("No se encontraron los datos del usuario");
       }
-      setLoading(false);
-    });
+    } else {
+      setCurrentUser(null);
+    }
+    setLoading(false);
+  });
 
-    return () => unsubscribe();
-  }, []);
+  return () => unsubscribe();
+}, []);
 
-  // Función para cerrar sesión
+
   const logout = () => {
     signOut(auth)
       .then(() => {

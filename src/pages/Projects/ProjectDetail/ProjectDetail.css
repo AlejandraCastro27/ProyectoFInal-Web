@@ -1,0 +1,128 @@
+
+.project-detail {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #ffffff;
+  color: #333;
+}
+
+
+.project-detail .back-button {
+  display: inline-block;
+  margin-bottom: 20px;
+  background-color: #444;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+.project-detail .back-button:hover {
+  background-color: #666;
+}
+
+
+.project-detail h2,
+.project-detail h3 {
+  margin-top: 20px;
+  font-size: 1.6rem;
+  text-align: center;
+}
+
+
+.project-detail p,
+.project-detail li {
+  font-size: 1rem;
+  margin: 6px 0;
+}
+
+
+.project-detail strong {
+  display: block;
+  margin-top: 10px;
+  font-weight: 600;
+  color: #222;
+}
+
+
+.project-detail input,
+.project-detail textarea {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.project-detail textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+
+.project-detail button {
+  background-color: #228be6;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  margin: 8px 6px 0 0;
+  border-radius: 5px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.project-detail button:hover {
+  background-color: #1864ab;
+}
+
+.project-detail button:last-child {
+  background-color: #e03131;
+}
+.project-detail button:last-child:hover {
+  background-color: #c92a2a;
+}
+
+.project-detail ul {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+.project-detail li {
+  list-style-type: disc;
+}
+
+
+@media (max-width: 768px) {
+  .project-detail {
+    padding: 15px;
+  }
+
+  .project-detail h2,
+  .project-detail h3 {
+    font-size: 1.3rem;
+  }
+
+  .project-detail button {
+    width: 100%;
+    margin: 6px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .project-detail p,
+  .project-detail li,
+  .project-detail input,
+  .project-detail textarea {
+    font-size: 0.95rem;
+  }
+
+  .project-detail h2 {
+    font-size: 1.2rem;
+  }
+}

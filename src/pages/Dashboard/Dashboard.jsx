@@ -3,10 +3,10 @@ import Navbar from '../../components/ui/Navbar/Navbar';
 import './Dashboard.css';
 
 export default function Dashboard() {
-  const { currentUser, logout } = useAuthContext();
+  const { currentUser } = useAuthContext();
 
   if (!currentUser) {
-    return <div>Cargando...</div>;
+    return <div className="loading">Cargando...</div>;
   }
 
   const isCoordinador = currentUser.rol === "coordinador";
@@ -16,16 +16,13 @@ export default function Dashboard() {
     <div className="dashboard">
       <Navbar />
       <main className="dashboard-content">
-        <h1>Bienvenido, {currentUser.email}</h1>
+        <h1>Bienvenido, {currentUser.nombre} {currentUser.apellido}</h1>
         {isCoordinador && (
-          <p>Acceso completo a la gestión de usuarios y proyectos.</p>
+          <p>Tienes acceso completo a la gestión de usuarios y proyectos.</p>
         )}
         {isDocente && (
           <p>Acceso a la creación de proyectos escolares y seguimiento.</p>
         )}
-        <button onClick={logout} className="logout-btn">
-          Cerrar Sesión
-        </button>
       </main>
     </div>
   );

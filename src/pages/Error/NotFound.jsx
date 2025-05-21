@@ -1,9 +1,9 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; // AÑADIR esto
+import { useNavigate } from "react-router-dom";
 import "./NotFound.css";
 
 const NotFound = () => {
-  const navigate = useNavigate(); // AÑADIR esto
+  const navigate = useNavigate();
 
   return (
     <div className="not-found">
