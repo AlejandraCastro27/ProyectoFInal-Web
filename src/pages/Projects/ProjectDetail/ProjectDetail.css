@@ -1,4 +1,3 @@
-/* ProjectDetail.css */
 
 .project-detail {
   padding: 2rem;
@@ -51,6 +50,7 @@
   flex-wrap: wrap;
   gap: 1rem;
   margin: 1rem 0;
+ 
 }
 
 .meta-item {
@@ -58,10 +58,16 @@
   background: #f9f9f9;
   padding: 0.75rem;
   border-left: 4px solid #7768ff;
+  
 }
 
 .project-section {
   margin: 2rem 0;
+  
+}
+
+span{
+  background-color: black;
 }
 
 .project-section h3 {

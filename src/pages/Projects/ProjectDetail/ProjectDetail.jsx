@@ -38,11 +38,11 @@ const ProjectDetail = () => {
   };
 
   // Obtiene los permisos según el rol del usuario actual
-  const permisosUsuario = currentUser?.rol ? permisos[currentUser.rol] : { 
-    puedeEditar: false, 
-    campos: [], 
-    puedeEliminar: false, 
-    puedeAgregarHitos: false 
+  const permisosUsuario = currentUser?.rol ? permisos[currentUser.rol] : {
+    puedeEditar: false,
+    campos: [],
+    puedeEliminar: false,
+    puedeAgregarHitos: false
   };
 
   useEffect(() => {
@@ -51,10 +51,10 @@ const ProjectDetail = () => {
         setCargando(true);
         const docRef = doc(db, "projects", id);
         const docSnap = await getDoc(docRef);
-        
+
         if (docSnap.exists()) {
           const data = docSnap.data();
-          
+
           // Obtener nombres de los miembros del equipo
           const miembrosConNombres = await Promise.all(
             data.miembros?.map(async (miembro) => {
@@ -73,11 +73,11 @@ const ProjectDetail = () => {
               }
             }) || []
           );
-          
+
           // Separar docentes y estudiantes
           const docentes = miembrosConNombres.filter(m => m.rol === "docente");
           const estudiantes = miembrosConNombres.filter(m => m.rol === "estudiante");
-          
+
           // El docente responsable es el primer docente de la lista o el docenteId
           let docenteResponsable = "No asignado";
           if (docentes.length > 0) {
@@ -85,14 +85,14 @@ const ProjectDetail = () => {
           } else if (data.docenteId) {
             try {
               const docenteDoc = await getDoc(doc(db, "users", data.docenteId));
-              docenteResponsable = docenteDoc.exists() ? 
-                `${docenteDoc.data().nombre} ${docenteDoc.data().apellido || ''}`.trim() : 
+              docenteResponsable = docenteDoc.exists() ?
+                `${docenteDoc.data().nombre} ${docenteDoc.data().apellido || ''}`.trim() :
                 "Docente desconocido";
             } catch (error) {
               console.error("Error cargando docente:", error);
             }
           }
-          
+
           // Cargar hitos del cronograma
           const hitosFormateados = data.cronograma?.hitos?.map((hito, index) => ({
             id: index,
@@ -102,9 +102,9 @@ const ProjectDetail = () => {
             imagen: hito.imagen,
             documento: hito.documento
           })) || [];
-          
-          setProyecto({ 
-            id: docSnap.id, 
+
+          setProyecto({
+            id: docSnap.id,
             ...data,
             miembros: miembrosConNombres,
             docentes: docentes,
@@ -112,7 +112,7 @@ const ProjectDetail = () => {
             docenteResponsable: docenteResponsable,
             hitosFormateados: hitosFormateados
           });
-          
+
           setForm({
             ...data,
             nuevosHitos: [] // Para manejar los hitos nuevos
@@ -234,12 +234,12 @@ const ProjectDetail = () => {
       // Procesar nuevos hitos si el usuario puede agregarlos
       if (permisosUsuario.puedeAgregarHitos && form.nuevosHitos?.length > 0) {
         const hitosExistentes = proyecto.cronograma?.hitos || [];
-        
+
         // Subir archivos de los nuevos hitos
         const hitosConArchivos = await Promise.all(
           form.nuevosHitos.map(async (hito, index) => {
             if (!hito.nombre || !hito.fecha) return null; // Skip incomplete milestones
-            
+
             let imagenUrl = null;
             let documentoUrl = null;
 
@@ -276,7 +276,7 @@ const ProjectDetail = () => {
 
         // Filtrar hitos válidos
         const hitosValidos = hitosConArchivos.filter(hito => hito !== null);
-        
+
         if (hitosValidos.length > 0) {
           actualizaciones.cronograma = {
             ...proyecto.cronograma,
@@ -287,9 +287,9 @@ const ProjectDetail = () => {
 
       const docRef = doc(db, "projects", id);
       await updateDoc(docRef, actualizaciones);
-      
+
       alert("Proyecto actualizado exitosamente");
-      
+
       // Recargar los datos del proyecto
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
@@ -297,7 +297,7 @@ const ProjectDetail = () => {
         setProyecto(prev => ({ ...prev, ...data }));
         setForm(prev => ({ ...prev, ...data, nuevosHitos: [] }));
       }
-      
+
       setEditando(false);
     } catch (error) {
       console.error("Error actualizando proyecto:", error);
@@ -320,7 +320,7 @@ const ProjectDetail = () => {
 
   const formatDate = (timestamp) => {
     if (!timestamp) return "No especificada";
-    
+
     try {
       if (timestamp.toDate) {
         return timestamp.toDate().toLocaleDateString("es-ES", {
@@ -369,7 +369,7 @@ const ProjectDetail = () => {
       {editando ? (
         <div className="edit-form">
           <h3>Editando Proyecto</h3>
-          
+
           {/* Solo coordinadores pueden editar el estado */}
           {permisosUsuario.campos.includes('estado') && (
             <div className="form-group">
@@ -391,22 +391,22 @@ const ProjectDetail = () => {
               <input name="titulo" value={form.titulo || ""} onChange={handleChange} />
             </div>
           )}
-          
+
           {permisosUsuario.campos.includes('area') && (
             <div className="form-group">
               <label>Área:</label>
               <input name="area" value={form.area || ""} onChange={handleChange} />
             </div>
           )}
-          
+
           {permisosUsuario.campos.includes('objetivos') && (
             <div className="form-group">
               <label>Objetivo General:</label>
-              <textarea 
-                value={form.objetivos?.general || ""} 
-                onChange={(e) => handleObjetivoChange('general', null, e.target.value)} 
+              <textarea
+                value={form.objetivos?.general || ""}
+                onChange={(e) => handleObjetivoChange('general', null, e.target.value)}
               />
-              
+
               <label>Objetivos Específicos:</label>
               {form.objetivos?.especificos?.map((obj, index) => (
                 <div key={index} className="objetivo-especifico">
@@ -415,8 +415,8 @@ const ProjectDetail = () => {
                     onChange={(e) => handleObjetivoChange('especifico', index, e.target.value)}
                     placeholder={`Objetivo específico ${index + 1}`}
                   />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="remove-btn"
                     onClick={() => removeObjetivoEspecifico(index)}
                   >
@@ -429,7 +429,7 @@ const ProjectDetail = () => {
               </button>
             </div>
           )}
-          
+
           {permisosUsuario.campos.includes('observaciones') && (
             <div className="form-group">
               <label>Observaciones:</label>
@@ -470,8 +470,8 @@ const ProjectDetail = () => {
                       onChange={(e) => handleFileChange(index, "documento", e)}
                     />
                   </div>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="remove-btn"
                     onClick={() => removeHito(index)}
                   >
@@ -484,7 +484,7 @@ const ProjectDetail = () => {
               </button>
             </div>
           )}
-          
+
           <div className="form-actions">
             <button className="save-button" onClick={handleGuardar}>Guardar</button>
             <button className="cancel-button" onClick={() => setEditando(false)}>Cancelar</button>
@@ -497,8 +497,9 @@ const ProjectDetail = () => {
             <span className={`status-badge ${proyecto.estado?.toLowerCase()}`}>
               {proyecto.estado}
             </span>
+            
           </div>
-          
+
           <div className="project-meta">
             <div className="meta-item">
               <strong>Área:</strong> {proyecto.area}
@@ -515,6 +516,9 @@ const ProjectDetail = () => {
             <div className="meta-item">
               <strong>Presupuesto:</strong> ${proyecto.presupuesto?.toLocaleString("es-CO")}
             </div>
+            <div className="meta-item">
+        <strong>Estado:</strong> <span className={`status-text ${proyecto.estado?.toLowerCase()}`}>{proyecto.estado}</span>
+      </div>
           </div>
 
           <div className="project-section">
@@ -523,7 +527,7 @@ const ProjectDetail = () => {
               <h4>Objetivo General</h4>
               <p>{proyecto.objetivos?.general || "No especificado"}</p>
             </div>
-            
+
             <div className="objective">
               <h4>Objetivos Específicos</h4>
               {proyecto.objetivos?.especificos?.length > 0 ? (
@@ -548,7 +552,7 @@ const ProjectDetail = () => {
                 <strong>Fecha de finalización:</strong> {formatDate(proyecto.cronograma?.fin)}
               </div>
             </div>
-            
+
             <h4>Hitos del Proyecto</h4>
             {proyecto.hitosFormateados?.length > 0 ? (
               <div className="milestones-container">
@@ -562,7 +566,7 @@ const ProjectDetail = () => {
                     </div>
                     {hito.imagen && (
                       <div className="milestone-image">
-                        <strong>Imagen:</strong> 
+                        <strong>Imagen:</strong>
                         <a href={hito.imagen} target="_blank" rel="noopener noreferrer">
                           Ver imagen
                         </a>
@@ -570,7 +574,7 @@ const ProjectDetail = () => {
                     )}
                     {hito.documento && (
                       <div className="milestone-document">
-                        <strong>Documento:</strong> 
+                        <strong>Documento:</strong>
                         <a href={hito.documento} target="_blank" rel="noopener noreferrer">
                           Descargar documento
                         </a>
@@ -586,7 +590,7 @@ const ProjectDetail = () => {
 
           <div className="project-section">
             <h3>Equipo de Trabajo</h3>
-            
+
             {proyecto.docentes?.length > 0 && (
               <div className="team-subsection">
                 <h4>Docentes</h4>
