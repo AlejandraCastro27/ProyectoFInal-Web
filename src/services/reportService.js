@@ -1,8 +1,7 @@
-// reportService.js
 
 import { jsPDF } from 'jspdf';
 
-// Generar reporte PDF de un proyecto
+
 export const generateProjectReport = (projectData) => {
   const doc = new jsPDF();
   doc.text('Reporte del Proyecto', 10, 10);
@@ -10,7 +9,7 @@ export const generateProjectReport = (projectData) => {
   doc.text(`Área: ${projectData.area}`, 10, 30);
   doc.text(`Objetivos: ${projectData.objetivos}`, 10, 40);
   doc.text(`Presupuesto: ${projectData.presupuesto}`, 10, 50);
-  // Añadir más campos según necesidad
+ 
 
   return doc;
 };

@@ -21,7 +21,7 @@ export default function Navbar() {
       </div>
 
       <ul className="navbar-links">
-        {/* Opciones específicas para Coordinador */}
+       
         {isCoordinador && (
           <>
             <li><Link to="/projects/create">Crear Proyecto</Link></li>
@@ -29,12 +29,12 @@ export default function Navbar() {
           </>
         )}
 
-        {/* Opción específica para Docente */}
+        
         {isDocente && (
           <li><Link to="/projects/create">Crear Proyecto</Link></li>
         )}
 
-        {/* Accesible para cualquier usuario autenticado */}
+        
         {currentUser && (
           <>
             <li><Link to="/projects">Proyectos</Link></li>

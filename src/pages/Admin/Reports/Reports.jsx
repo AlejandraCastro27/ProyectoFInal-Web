@@ -6,7 +6,7 @@ import { Bar } from "react-chartjs-2";
 import "chart.js/auto";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import "./Reports.css"; // Puedes crear estilos personalizados
+import "./Reports.css"; 
 
 const Reports = () => {
   const [projects, setProjects] = useState([]);
@@ -22,7 +22,7 @@ const Reports = () => {
     fetchProjects();
   }, []);
 
-  // Contar proyectos por estado
+  
   const estados = ["formulacion", "evaluacion", "activo", "inactivo", "finalizado"];
   const estadosCount = estados.map(
     estado => projects.filter(p => p.estado === estado).length

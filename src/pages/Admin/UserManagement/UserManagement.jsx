@@ -59,7 +59,7 @@ const UserManagement = ({ currentUser }) => {
       alert("Usuario actualizado correctamente");
       setEditando(null);
 
-      // Refrescar lista
+     
       const querySnapshot = await getDocs(collection(db, "users"));
       const data = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -97,7 +97,7 @@ const UserManagement = ({ currentUser }) => {
 
   return (
     <div className="user-management">
-      {/* 👇 Botón de volver al dashboard */}
+      
       <button onClick={() => navigate("/dashboard")} className="back-btn">
         ← Volver al Dashboard
       </button>

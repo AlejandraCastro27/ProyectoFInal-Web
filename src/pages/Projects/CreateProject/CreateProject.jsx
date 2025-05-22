@@ -10,10 +10,10 @@ const CreateProject = () => {
   const { currentUser } = useAuthContext();
   const navigate = useNavigate();
 
-  // Estado para usuarios cargados de Firestore
+  
   const [usuarios, setUsuarios] = useState([]);
 
-  // Estado del formulario
+
   const [form, setForm] = useState({
     titulo: "",
     area: "",
@@ -28,7 +28,7 @@ const CreateProject = () => {
     miembros: [{ userId: "", rol: "docente" }],
   });
 
-  // Cargar usuarios con su rol al montar el componente
+ 
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
@@ -38,7 +38,7 @@ const CreateProject = () => {
           return {
             id: doc.id,
             nombre: data.nombre || data.email || "Usuario sin nombre",
-            rol: data.rol ? data.rol : "estudiante", // Si no tiene rol, asignamos estudiante
+            rol: data.rol ? data.rol : "estudiante", 
           };
         });
         setUsuarios(listaUsuarios);
@@ -49,7 +49,6 @@ const CreateProject = () => {
     fetchUsuarios();
   }, []);
 
-  // Manejadores de cambios del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
