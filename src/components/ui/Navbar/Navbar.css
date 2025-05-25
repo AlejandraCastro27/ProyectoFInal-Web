@@ -1,9 +1,3 @@
-/* Variables globales (se espera que estén definidas en :root en un CSS principal) */
-/* 
-  --primary: color principal del sistema
-  --text-color: color base del texto
-  --hover: color de fondo en hover o alternativa
-*/
 
 /* Barra de navegación principal */
 .navbar {
