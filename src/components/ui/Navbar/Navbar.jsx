@@ -38,7 +38,10 @@ export default function Navbar() {
         )}
 
         {isDocente && (
-          <li><Link to="/projects/create">Crear Proyecto</Link></li>
+          <>
+            <li><Link to="/projects/create">Crear Proyecto</Link></li>
+            <li><Link to="/reports">Reportes</Link></li>
+          </>
         )}
 
         {/* Enlaces comunes para usuarios autenticados */}

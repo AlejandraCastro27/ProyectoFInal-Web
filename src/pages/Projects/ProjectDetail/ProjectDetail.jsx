@@ -93,7 +93,7 @@ const ProjectDetail = () => {
         setCargando(true);
         const docRef = doc(db, "projects", id);
         const docSnap = await getDoc(docRef);
-
+        console.log(docSnap.data());
         if (docSnap.exists()) {
           const data = docSnap.data();
 
@@ -522,6 +522,11 @@ const ProjectDetail = () => {
                     <Typography variant="subtitle2" color="text.secondary">Institución</Typography>
                     <Typography>{proyecto.institucion || "No especificada"}</Typography>
                   </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">Fecha de Inicio</Typography>
+                    <Typography>{formatDate(proyecto.fechaCreacion) || "No especificada"}</Typography>
+                  </Box>
+                 
                 </Stack>
               </Paper>
             </Grid>
@@ -636,6 +641,14 @@ const ProjectDetail = () => {
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
                   Cronograma
                 </Typography>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">Fecha de Inicio</Typography>
+                  <Typography>{formatDate(proyecto.cronograma.inicio) || "No especificada"}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">Fecha de Fin</Typography>
+                  <Typography>{formatDate(proyecto.cronograma.fin) || "No especificada"}</Typography>
+                </Box>
                 {editando && permisosUsuario.puedeAgregarHitos && (
                   <Box sx={{ mb: 3 }}>
                     <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
@@ -757,6 +770,30 @@ const ProjectDetail = () => {
                     </Grid>
                   ))}
                 </Grid>
+              </Paper>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Paper elevation={1} sx={{ p: 2, borderRadius: 2 }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
+                  Observaciones
+                </Typography>
+                {editando && permisosUsuario.campos.includes('observaciones') ? (
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={4}
+                    name="observaciones"
+                    value={form.observaciones || ""}
+                    onChange={handleChange}
+                    variant="outlined"
+                    placeholder="Ingrese las observaciones del proyecto"
+                  />
+                ) : (
+                  <Typography>
+                    {proyecto.observaciones || "No hay observaciones registradas"}
+                  </Typography>
+                )}
               </Paper>
             </Grid>
 

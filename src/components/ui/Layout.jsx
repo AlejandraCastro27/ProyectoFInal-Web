@@ -49,7 +49,7 @@ const menuItems = [
     text: 'Reportes',
     icon: <AssessmentIcon />,
     path: '/reports',
-    roles: ['coordinador']
+    roles: ['coordinador', 'docente', 'estudiante']
   },
 ];
 
