@@ -6,7 +6,18 @@ import { Bar } from "react-chartjs-2";
 import "chart.js/auto";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import "./Reports.css"; 
+import Layout from '../../../components/ui/Layout';
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  Stack
+} from '@mui/material';
 
 const Reports = () => {
   const [projects, setProjects] = useState([]);
@@ -18,11 +29,9 @@ const Reports = () => {
       const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setProjects(data);
     };
-
     fetchProjects();
   }, []);
 
-  
   const estados = ["formulacion", "evaluacion", "activo", "inactivo", "finalizado"];
   const estadosCount = estados.map(
     estado => projects.filter(p => p.estado === estado).length
@@ -45,8 +54,6 @@ const Reports = () => {
     doc.text("Reporte de Proyectos", 14, 20);
     doc.setFontSize(12);
     doc.text(`Total de proyectos: ${projects.length}`, 14, 30);
-
-    // Datos para tabla
     const tableData = projects.map((p, index) => [
       index + 1,
       p.titulo,
@@ -58,42 +65,71 @@ const Reports = () => {
         currency: "COP",
       }) ?? "N/A",
     ]);
-
     autoTable(doc, {
       startY: 40,
       head: [["#", "Título", "Área", "Estado", "Institución", "Presupuesto"]],
       body: tableData,
     });
-
     doc.save("reporte_proyectos.pdf");
   };
 
   return (
-    <div className="reportes-container">
-      <button onClick={() => navigate("/dashboard")} className="back-btn">
-        ← Volver al Dashboard
-      </button>
-
-      <h2>Visualización de Reportes</h2>
-      <div style={{ maxWidth: 700, margin: "0 auto" }}>
-        <Bar data={chartData} />
-      </div>
-
-      <button onClick={generatePDF} className="pdf-btn">
-        📄 Generar PDF
-      </button>
-
-      <div className="tabla-preview">
-        <h3>Listado de Proyectos</h3>
-        <ul>
-          {projects.map((p, i) => (
-            <li key={p.id}>
-              <strong>{i + 1}. {p.titulo}</strong> – {p.area} – Estado: <em>{p.estado}</em>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+    <Layout>
+      <Box sx={{ width: '100%', p: { xs: 1, md: 3 } }}>
+        <Paper elevation={3} sx={{ width: '100%', maxWidth: 900, mx: 'auto', p: { xs: 2, md: 4 }, borderRadius: 4, boxShadow: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
+            <Typography variant="h4" sx={{ flexGrow: 1, fontWeight: 700, fontFamily: 'Baloo 2' }}>
+              Visualización de Reportes
+            </Typography>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => navigate("/dashboard")}
+              sx={{ borderRadius: 2, fontWeight: 600 }}
+            >
+              ← Volver al Dashboard
+            </Button>
+          </Box>
+          <Box sx={{ maxWidth: 700, mx: 'auto', mb: 4 }}>
+            <Bar data={chartData} />
+          </Box>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={generatePDF}
+            sx={{ mb: 4, fontWeight: 700, fontFamily: 'Baloo 2', borderRadius: 2 }}
+            startIcon={<span role="img" aria-label="pdf">📄</span>}
+          >
+            Generar PDF
+          </Button>
+          <Paper elevation={1} sx={{ p: 2, borderRadius: 3, background: '#F7F7F7' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main', mb: 2, fontFamily: 'Baloo 2' }}>
+              Listado de Proyectos
+            </Typography>
+            <List>
+              {projects.map((p, i) => (
+                <React.Fragment key={p.id}>
+                  <ListItem alignItems="flex-start" sx={{ py: 1 }}>
+                    <ListItemText
+                      primary={<span style={{ fontWeight: 600 }}>{i + 1}. {p.titulo}</span>}
+                      secondary={
+                        <Stack direction="column" spacing={0.5}>
+                          <span><b>Área:</b> {p.area || 'No especificada'}</span>
+                          <span><b>Estado:</b> <em>{p.estado}</em></span>
+                          <span><b>Institución:</b> {p.institucion || 'No especificada'}</span>
+                          <span><b>Presupuesto:</b> {p.presupuesto?.toLocaleString("es-CO", { style: "currency", currency: "COP" }) ?? "N/A"}</span>
+                        </Stack>
+                      }
+                    />
+                  </ListItem>
+                  {i < projects.length - 1 && <Divider />}
+                </React.Fragment>
+              ))}
+            </List>
+          </Paper>
+        </Paper>
+      </Box>
+    </Layout>
   );
 };
 

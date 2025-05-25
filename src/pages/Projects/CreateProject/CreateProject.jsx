@@ -6,6 +6,8 @@ import { useAuthContext } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "./CreateProject.css";
+import Layout from '../../../components/ui/Layout';
+import { CircularProgress, Box, Typography, Paper, Button, Grid, TextField, MenuItem } from '@mui/material';
 
 // Componente principal CreateProject
 const CreateProject = () => {
@@ -211,150 +213,319 @@ const CreateProject = () => {
     }
   };
 
-  // Renderizado del formulario en JSX
+  if (!usuarios.length) {
+    return (
+      <Layout>
+        <Box sx={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <CircularProgress color="primary" size={60} thickness={5} />
+            <Typography sx={{ mt: 2, fontFamily: 'Baloo 2', fontWeight: 600, color: 'primary.main' }}>
+              Cargando usuarios...
+            </Typography>
+          </Box>
+        </Box>
+      </Layout>
+    );
+  }
+
   return (
-    <div className="create-project">
-      {/* Botón para volver al dashboard */}
-      <button onClick={() => navigate("/dashboard")} className="back-btn">
-        ← Volver al Dashboard
-      </button>
-
-      <h1>Crear Proyecto</h1>
-
-      <form onSubmit={handleSubmit}>
-        {/* Campos del formulario */}
-        {/* Título */}
-        <label>Título</label>
-        <input name="titulo" value={form.titulo} onChange={handleChange} required />
-
-        {/* Área */}
-        <label>Área</label>
-        <input name="area" value={form.area} onChange={handleChange} required />
-
-        {/* Objetivo general */}
-        <label>Objetivo General</label>
-        <textarea
-          name="objetivoGeneral"
-          value={form.objetivoGeneral}
-          onChange={handleChange}
-          required
-        />
-
-        {/* Objetivos específicos dinámicos */}
-        <label>Objetivos Específicos</label>
-        {form.objetivosEspecificos.map((obj, index) => (
-          <input
-            key={index}
-            value={obj}
-            onChange={(e) => handleObjetivoChange(index, e.target.value)}
-            placeholder={`Objetivo ${index + 1}`}
-          />
-        ))}
-        <button type="button" onClick={addObjetivoEspecifico}>
-          + Añadir objetivo específico
-        </button>
-
-        {/* Institución */}
-        <label>Institución</label>
-        <input name="institucion" value={form.institucion} onChange={handleChange} required />
-
-        {/* Presupuesto */}
-        <label>Presupuesto (COP)</label>
-        <input
-          type="number"
-          name="presupuesto"
-          value={form.presupuesto}
-          onChange={handleChange}
-          required
-        />
-
-        {/* Fechas */}
-        <label>Fecha de Inicio</label>
-        <input type="date" name="inicio" value={form.inicio} onChange={handleChange} required />
-
-        <label>Fecha de Finalización</label>
-        <input type="date" name="fin" value={form.fin} onChange={handleChange} required />
-
-        {/* Sección de hitos */}
-        <label>Hitos</label>
-        {form.hitos.map((hito, index) => (
-          <div key={index}>
-            <input
-              placeholder="Nombre del hito"
-              value={hito.nombre}
-              onChange={(e) => handleHitoChange(index, "nombre", e.target.value)}
-            />
-            <input
-              type="date"
-              value={hito.fecha}
-              onChange={(e) => handleHitoChange(index, "fecha", e.target.value)}
-            />
-            <label>Imagen</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleFileChange(index, "imagen", e)}
-            />
-            <label>Documento</label>
-            <input
-              type="file"
-              accept=".pdf,.doc,.docx,.ppt,.pptx"
-              onChange={(e) => handleFileChange(index, "documento", e)}
-            />
-          </div>
-        ))}
-        <button type="button" onClick={addHito}>
-          + Añadir Hito
-        </button>
-
-        {/* Observaciones */}
-        <label>Observaciones</label>
-        <textarea
-          name="observaciones"
-          value={form.observaciones}
-          onChange={handleChange}
-        />
-
-        {/* Miembros del proyecto */}
-        <label>Miembros</label>
-        {form.miembros.map((miembro, index) => {
-          // Filtrar usuarios por el rol seleccionado en ese miembro
-          const usuariosFiltrados = usuarios.filter((u) => u.rol === miembro.rol);
-
-          return (
-            <div key={index} style={{ marginBottom: "10px" }}>
-              <select
-                value={miembro.userId}
-                onChange={(e) => handleMiembroChange(index, "userId", e.target.value)}
-                required
-              >
-                <option value="">Seleccione un usuario</option>
-                {usuariosFiltrados.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.nombre} ({u.rol})
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={miembro.rol}
-                onChange={(e) => handleMiembroChange(index, "rol", e.target.value)}
-                style={{ marginLeft: "10px" }}
-              >
-                <option value="docente">Docente</option>
-                <option value="estudiante">Estudiante</option>
-              </select>
-            </div>
-          );
-        })}
-        <button type="button" onClick={addMiembro}>
-          + Añadir Miembro
-        </button>
-
-        {/* Botón para enviar el formulario */}
-        <button type="submit">Crear Proyecto</button>
-      </form>
-    </div>
+    <Layout>
+      <Box sx={{ width: '100%', p: { xs: 1, md: 3 } }}>
+        <Paper elevation={3} sx={{ width: '100%', maxWidth: 800, mx: 'auto', p: { xs: 2, md: 4 }, borderRadius: 4, boxShadow: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
+            <Typography variant="h4" sx={{ flexGrow: 1, fontWeight: 700, fontFamily: 'Baloo 2' }}>
+              Crear Proyecto
+            </Typography>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => navigate("/dashboard")}
+              sx={{ borderRadius: 2, fontWeight: 600 }}
+            >
+              ← Volver al Dashboard
+            </Button>
+          </Box>
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  label="Título"
+                  name="titulo"
+                  value={form.titulo}
+                  onChange={handleChange}
+                  fullWidth
+                  required
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Área"
+                  name="area"
+                  value={form.area}
+                  onChange={handleChange}
+                  fullWidth
+                  required
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Institución"
+                  name="institucion"
+                  value={form.institucion}
+                  onChange={handleChange}
+                  fullWidth
+                  required
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Presupuesto (COP)"
+                  name="presupuesto"
+                  type="number"
+                  value={form.presupuesto}
+                  onChange={handleChange}
+                  fullWidth
+                  required
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Fecha de Inicio"
+                  name="inicio"
+                  type="date"
+                  value={form.inicio}
+                  onChange={handleChange}
+                  fullWidth
+                  required
+                  variant="outlined"
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Fecha de Finalización"
+                  name="fin"
+                  type="date"
+                  value={form.fin}
+                  onChange={handleChange}
+                  fullWidth
+                  required
+                  variant="outlined"
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Objetivo General"
+                  name="objetivoGeneral"
+                  value={form.objetivoGeneral}
+                  onChange={handleChange}
+                  fullWidth
+                  required
+                  multiline
+                  rows={2}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main', mb: 1 }}>
+                  Objetivos Específicos
+                </Typography>
+                <Grid container spacing={1}>
+                  {form.objetivosEspecificos.map((obj, index) => (
+                    <Grid item xs={12} md={6} key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <TextField
+                        value={obj}
+                        onChange={(e) => handleObjetivoChange(index, e.target.value)}
+                        placeholder={`Objetivo ${index + 1}`}
+                        fullWidth
+                        variant="outlined"
+                        size="small"
+                      />
+                      <Button
+                        color="error"
+                        variant="outlined"
+                        onClick={() => setForm(prev => ({
+                          ...prev,
+                          objetivosEspecificos: prev.objetivosEspecificos.filter((_, i) => i !== index)
+                        }))}
+                        sx={{ minWidth: 0, px: 1 }}
+                        disabled={form.objetivosEspecificos.length === 1}
+                      >
+                        –
+                      </Button>
+                    </Grid>
+                  ))}
+                  <Grid item xs={12}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={addObjetivoEspecifico}
+                      sx={{ mt: 1 }}
+                    >
+                      + Añadir objetivo específico
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main', mb: 1 }}>
+                  Hitos
+                </Typography>
+                <Grid container spacing={2}>
+                  {form.hitos.map((hito, index) => (
+                    <Grid item xs={12} key={index}>
+                      <Paper elevation={1} sx={{ p: 2, mb: 2, borderRadius: 2 }}>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} md={4}>
+                            <TextField
+                              label="Nombre del hito"
+                              value={hito.nombre}
+                              onChange={(e) => handleHitoChange(index, "nombre", e.target.value)}
+                              fullWidth
+                              size="small"
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={4}>
+                            <TextField
+                              label="Fecha"
+                              type="date"
+                              value={hito.fecha}
+                              onChange={(e) => handleHitoChange(index, "fecha", e.target.value)}
+                              fullWidth
+                              size="small"
+                              InputLabelProps={{ shrink: true }}
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={2}>
+                            <Button
+                              component="label"
+                              variant="outlined"
+                              fullWidth
+                            >
+                              Imagen
+                              <input
+                                type="file"
+                                hidden
+                                accept="image/*"
+                                onChange={(e) => handleFileChange(index, "imagen", e)}
+                              />
+                            </Button>
+                          </Grid>
+                          <Grid item xs={12} md={2}>
+                            <Button
+                              component="label"
+                              variant="outlined"
+                              fullWidth
+                            >
+                              Documento
+                              <input
+                                type="file"
+                                hidden
+                                accept=".pdf,.doc,.docx,.ppt,.pptx"
+                                onChange={(e) => handleFileChange(index, "documento", e)}
+                              />
+                            </Button>
+                          </Grid>
+                        </Grid>
+                      </Paper>
+                    </Grid>
+                  ))}
+                  <Grid item xs={12}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={addHito}
+                      sx={{ mt: 1 }}
+                    >
+                      + Añadir Hito
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Observaciones"
+                  name="observaciones"
+                  value={form.observaciones}
+                  onChange={handleChange}
+                  fullWidth
+                  multiline
+                  rows={2}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main', mb: 1 }}>
+                  Miembros del Proyecto
+                </Typography>
+                <Grid container spacing={2}>
+                  {form.miembros.map((miembro, index) => {
+                    const usuariosFiltrados = usuarios.filter((u) => u.rol === miembro.rol);
+                    return (
+                      <Grid item xs={12} md={6} key={index}>
+                        <Grid container spacing={1} alignItems="center">
+                          <Grid item xs={6}>
+                            <TextField
+                              select
+                              label="Usuario"
+                              value={miembro.userId}
+                              onChange={(e) => handleMiembroChange(index, "userId", e.target.value)}
+                              fullWidth
+                              required
+                              variant="outlined"
+                            >
+                              <MenuItem value="">Seleccione un usuario</MenuItem>
+                              {usuariosFiltrados.map((u) => (
+                                <MenuItem key={u.id} value={u.id}>
+                                  {u.nombre} ({u.rol})
+                                </MenuItem>
+                              ))}
+                            </TextField>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField
+                              select
+                              label="Rol"
+                              value={miembro.rol}
+                              onChange={(e) => handleMiembroChange(index, "rol", e.target.value)}
+                              fullWidth
+                              variant="outlined"
+                            >
+                              <MenuItem value="docente">Docente</MenuItem>
+                              <MenuItem value="estudiante">Estudiante</MenuItem>
+                            </TextField>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                    );
+                  })}
+                  <Grid item xs={12}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={addMiembro}
+                      sx={{ mt: 1 }}
+                    >
+                      + Añadir Miembro
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+                <Button type="submit" variant="contained" color="success" size="large" sx={{ borderRadius: 2, fontWeight: 700, fontFamily: 'Baloo 2' }}>
+                  Crear Proyecto
+                </Button>
+              </Grid>
+            </Grid>
+          </Box>
+        </Paper>
+      </Box>
+    </Layout>
   );
 };
 

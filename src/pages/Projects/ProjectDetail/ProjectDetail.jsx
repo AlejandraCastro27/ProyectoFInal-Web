@@ -4,7 +4,45 @@ import { doc, getDoc, updateDoc, deleteDoc, Timestamp } from "firebase/firestore
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../../../config/firebase";
 import { useAuthContext } from "../../../context/AuthContext";
-import "./ProjectDetail.css";
+import Layout from '../../../components/ui/Layout';
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  TextField,
+  Grid,
+  IconButton,
+  Divider,
+  CircularProgress,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Card,
+  CardContent,
+  CardMedia,
+  Chip,
+  Stack,
+  useMediaQuery,
+} from '@mui/material';
+import {
+  ArrowBack as ArrowBackIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon,
+  Add as AddIcon,
+  Remove as RemoveIcon,
+  Description as DescriptionIcon,
+  Image as ImageIcon,
+} from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
 
 const ProjectDetail = () => {
   const { id } = useParams();
@@ -14,6 +52,10 @@ const ProjectDetail = () => {
   const [editando, setEditando] = useState(false);
   const [form, setForm] = useState(null);
   const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
+  const [confirmarEliminar, setConfirmarEliminar] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Permisos por rol
   const permisos = {
@@ -352,300 +394,415 @@ const ProjectDetail = () => {
   const estadosDisponibles = ["formulacion", "evaluacion", "activo", "inactivo", "finalizado"];
 
   if (cargando) return (
-    <div className="loading-container">
-      <p>Cargando proyecto...</p>
-      <div className="loading-spinner"></div>
-    </div>
+    <Layout>
+      <Box sx={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress color="primary" size={60} thickness={5} />
+          <Typography sx={{ mt: 2, fontFamily: 'Baloo 2', fontWeight: 600, color: 'primary.main' }}>
+            Cargando proyecto...
+          </Typography>
+        </Box>
+      </Box>
+    </Layout>
   );
 
   if (!proyecto) return <p className="error-message">Proyecto no encontrado</p>;
 
   return (
-    <div className="project-detail">
-      <button className="back-button" onClick={() => navigate("/projects")}>
-        ← Volver a proyectos
-      </button>
-
-      {editando ? (
-        <div className="edit-form">
-          <h3>Editando Proyecto</h3>
-
-          {/* Solo coordinadores pueden editar el estado */}
-          {permisosUsuario.campos.includes('estado') && (
-            <div className="form-group">
-              <label>Estado:</label>
-              <select name="estado" value={form.estado || ""} onChange={handleChange}>
-                {estadosDisponibles.map(estado => (
-                  <option key={estado} value={estado}>
-                    {estado.charAt(0).toUpperCase() + estado.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Docentes y estudiantes pueden editar estos campos */}
-          {permisosUsuario.campos.includes('titulo') && (
-            <div className="form-group">
-              <label>Título:</label>
-              <input name="titulo" value={form.titulo || ""} onChange={handleChange} />
-            </div>
-          )}
-
-          {permisosUsuario.campos.includes('area') && (
-            <div className="form-group">
-              <label>Área:</label>
-              <input name="area" value={form.area || ""} onChange={handleChange} />
-            </div>
-          )}
-
-          {permisosUsuario.campos.includes('objetivos') && (
-            <div className="form-group">
-              <label>Objetivo General:</label>
-              <textarea
-                value={form.objetivos?.general || ""}
-                onChange={(e) => handleObjetivoChange('general', null, e.target.value)}
-              />
-
-              <label>Objetivos Específicos:</label>
-              {form.objetivos?.especificos?.map((obj, index) => (
-                <div key={index} className="objetivo-especifico">
-                  <textarea
-                    value={obj}
-                    onChange={(e) => handleObjetivoChange('especifico', index, e.target.value)}
-                    placeholder={`Objetivo específico ${index + 1}`}
-                  />
-                  <button
-                    type="button"
-                    className="remove-btn"
-                    onClick={() => removeObjetivoEspecifico(index)}
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              ))}
-              <button type="button" onClick={addObjetivoEspecifico} className="add-btn">
-                + Añadir objetivo específico
-              </button>
-            </div>
-          )}
-
-          {permisosUsuario.campos.includes('observaciones') && (
-            <div className="form-group">
-              <label>Observaciones:</label>
-              <textarea name="observaciones" value={form.observaciones || ""} onChange={handleChange} />
-            </div>
-          )}
-
-          {/* Agregar nuevos hitos (docentes y estudiantes) */}
-          {permisosUsuario.puedeAgregarHitos && (
-            <div className="form-group">
-              <label>Nuevos Hitos:</label>
-              {form.nuevosHitos?.map((hito, index) => (
-                <div key={index} className="hito-form">
-                  <h5>Hito {index + 1}</h5>
-                  <input
-                    placeholder="Nombre del hito"
-                    value={hito.nombre || ""}
-                    onChange={(e) => handleHitoChange(index, "nombre", e.target.value)}
-                  />
-                  <input
-                    type="date"
-                    value={hito.fecha || ""}
-                    onChange={(e) => handleHitoChange(index, "fecha", e.target.value)}
-                  />
-                  <div>
-                    <label>Imagen:</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileChange(index, "imagen", e)}
-                    />
-                  </div>
-                  <div>
-                    <label>Documento:</label>
-                    <input
-                      type="file"
-                      accept=".pdf,.doc,.docx,.ppt,.pptx"
-                      onChange={(e) => handleFileChange(index, "documento", e)}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    className="remove-btn"
-                    onClick={() => removeHito(index)}
-                  >
-                    Eliminar Hito
-                  </button>
-                </div>
-              ))}
-              <button type="button" onClick={addHito} className="add-btn">
-                + Añadir Hito
-              </button>
-            </div>
-          )}
-
-          <div className="form-actions">
-            <button className="save-button" onClick={handleGuardar}>Guardar</button>
-            <button className="cancel-button" onClick={() => setEditando(false)}>Cancelar</button>
-          </div>
-        </div>
-      ) : (
-        <div className="project-info">
-          <div className="project-header">
-            <h2>{proyecto.titulo}</h2>
-            <span className={`status-badge ${proyecto.estado?.toLowerCase()}`}>
-              {proyecto.estado}
-            </span>
-            
-          </div>
-
-          <div className="project-meta">
-            <div className="meta-item">
-              <strong>Área:</strong> {proyecto.area}
-            </div>
-            <div className="meta-item">
-              <strong>Institución:</strong> {proyecto.institucion}
-            </div>
-            <div className="meta-item">
-              <strong>Docente responsable:</strong> {proyecto.docenteResponsable}
-            </div>
-            <div className="meta-item">
-              <strong>Fecha de creación:</strong> {formatDate(proyecto.fechaCreacion)}
-            </div>
-            <div className="meta-item">
-              <strong>Presupuesto:</strong> ${proyecto.presupuesto?.toLocaleString("es-CO")}
-            </div>
-            <div className="meta-item">
-        <strong>Estado:</strong> <span className={`status-text ${proyecto.estado?.toLowerCase()}`}>{proyecto.estado}</span>
-      </div>
-          </div>
-
-          <div className="project-section">
-            <h3>Objetivos</h3>
-            <div className="objective">
-              <h4>Objetivo General</h4>
-              <p>{proyecto.objetivos?.general || "No especificado"}</p>
-            </div>
-
-            <div className="objective">
-              <h4>Objetivos Específicos</h4>
-              {proyecto.objetivos?.especificos?.length > 0 ? (
-                <ul className="objectives-list">
-                  {proyecto.objetivos.especificos.map((esp, idx) => (
-                    <li key={idx}>{esp}</li>
-                  ))}
-                </ul>
+    <Layout>
+      <Box sx={{ width: '100%', p: { xs: 1, md: 3 } }}>
+        <Paper elevation={3} sx={{ width: '100%', p: { xs: 2, md: 3 }, borderRadius: 4, boxShadow: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2, flexDirection: { xs: 'column', md: 'row' } }}>
+            <Typography variant="h4" sx={{ flexGrow: 1, fontWeight: 700, fontFamily: 'Baloo 2' }}>
+              {editando ? (
+                <TextField
+                  fullWidth
+                  name="titulo"
+                  value={form.titulo}
+                  onChange={handleChange}
+                  variant="outlined"
+                  sx={{ mb: 2 }}
+                />
               ) : (
-                <p>No se han definido objetivos específicos</p>
+                proyecto.titulo
               )}
-            </div>
-          </div>
-
-          <div className="project-section">
-            <h3>Cronograma</h3>
-            <div className="timeline">
-              <div className="timeline-item">
-                <strong>Fecha de inicio:</strong> {formatDate(proyecto.cronograma?.inicio)}
-              </div>
-              <div className="timeline-item">
-                <strong>Fecha de finalización:</strong> {formatDate(proyecto.cronograma?.fin)}
-              </div>
-            </div>
-
-            <h4>Hitos del Proyecto</h4>
-            {proyecto.hitosFormateados?.length > 0 ? (
-              <div className="milestones-container">
-                {proyecto.hitosFormateados.map((hito) => (
-                  <div key={hito.id} className="milestone-card">
-                    <div className="milestone-header">
-                      <h5>{hito.nombre}</h5>
-                    </div>
-                    <div className="milestone-date">
-                      <strong>Fecha:</strong> {hito.fechaFormateada}
-                    </div>
-                    {hito.imagen && (
-                      <div className="milestone-image">
-                        <strong>Imagen:</strong>
-                        <a href={hito.imagen} target="_blank" rel="noopener noreferrer">
-                          Ver imagen
-                        </a>
-                      </div>
-                    )}
-                    {hito.documento && (
-                      <div className="milestone-document">
-                        <strong>Documento:</strong>
-                        <a href={hito.documento} target="_blank" rel="noopener noreferrer">
-                          Descargar documento
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p>No se han registrado hitos para este proyecto</p>
-            )}
-          </div>
-
-          <div className="project-section">
-            <h3>Equipo de Trabajo</h3>
-
-            {proyecto.docentes?.length > 0 && (
-              <div className="team-subsection">
-                <h4>Docentes</h4>
-                <div className="team-members">
-                  {proyecto.docentes.map((miembro, idx) => (
-                    <div key={`docente-${idx}`} className="team-member docente">
-                      <div className="member-name">{miembro.nombre}</div>
-                      <div className="member-role">Docente</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {proyecto.estudiantes?.length > 0 && (
-              <div className="team-subsection">
-                <h4>Estudiantes</h4>
-                <div className="team-members">
-                  {proyecto.estudiantes.map((miembro, idx) => (
-                    <div key={`estudiante-${idx}`} className="team-member estudiante">
-                      <div className="member-name">{miembro.nombre}</div>
-                      <div className="member-role">Estudiante</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {(!proyecto.docentes?.length && !proyecto.estudiantes?.length) && (
-              <p>No hay miembros registrados en este proyecto</p>
-            )}
-          </div>
-
-          <div className="project-section">
-            <h3>Observaciones</h3>
-            <div className="observations">
-              {proyecto.observaciones || "No hay observaciones registradas"}
-            </div>
-          </div>
-
-          {permisosUsuario.puedeEditar && (
-            <div className="project-actions">
-              <button className="edit-button" onClick={() => setEditando(true)}>
-                Editar Proyecto
-              </button>
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => navigate("/projects")}
+                startIcon={<ArrowBackIcon />}
+                sx={{ borderRadius: 2 }}
+              >
+                Volver
+              </Button>
+              {permisosUsuario.puedeEditar && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => setEditando(!editando)}
+                  startIcon={editando ? <CancelIcon /> : <EditIcon />}
+                  sx={{ borderRadius: 2 }}
+                >
+                  {editando ? "Cancelar" : "Editar"}
+                </Button>
+              )}
               {permisosUsuario.puedeEliminar && (
-                <button className="delete-button" onClick={handleEliminar}>
-                  Eliminar Proyecto
-                </button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={() => setConfirmarEliminar(true)}
+                  startIcon={<DeleteIcon />}
+                  sx={{ borderRadius: 2 }}
+                >
+                  Eliminar
+                </Button>
               )}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+            </Box>
+          </Box>
+
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Paper elevation={1} sx={{ p: 2, borderRadius: 2 }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
+                  Información General
+                </Typography>
+                <Stack spacing={2}>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">Estado</Typography>
+                    {editando && permisosUsuario.campos.includes('estado') ? (
+                      <FormControl fullWidth>
+                        <Select
+                          value={form.estado}
+                          onChange={handleChange}
+                          name="estado"
+                        >
+                          {estadosDisponibles.map(estado => (
+                            <MenuItem key={estado} value={estado}>
+                              {estado.charAt(0).toUpperCase() + estado.slice(1)}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    ) : (
+                      <Chip
+                        label={proyecto.estado}
+                        color={
+                          proyecto.estado === 'completado'
+                            ? 'success'
+                            : proyecto.estado === 'en proceso'
+                            ? 'warning'
+                            : 'error'
+                        }
+                        sx={{ mt: 1 }}
+                      />
+                    )}
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">Área</Typography>
+                    {editando && permisosUsuario.campos.includes('area') ? (
+                      <TextField
+                        fullWidth
+                        name="area"
+                        value={form.area}
+                        onChange={handleChange}
+                        variant="outlined"
+                        size="small"
+                      />
+                    ) : (
+                      <Typography>{proyecto.area || "No especificada"}</Typography>
+                    )}
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">Docente Responsable</Typography>
+                    <Typography>{proyecto.docenteResponsable}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">Institución</Typography>
+                    <Typography>{proyecto.institucion || "No especificada"}</Typography>
+                  </Box>
+                </Stack>
+              </Paper>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Paper elevation={1} sx={{ p: 2, borderRadius: 2 }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
+                  Equipo de Trabajo
+                </Typography>
+                <Stack spacing={2}>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">Docentes</Typography>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                      {proyecto.docentes.map((docente, index) => (
+                        <Chip
+                          key={index}
+                          label={docente.nombre}
+                          color="primary"
+                          variant="outlined"
+                          sx={{ mt: 1 }}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">Estudiantes</Typography>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                      {proyecto.estudiantes.map((estudiante, index) => (
+                        <Chip
+                          key={index}
+                          label={estudiante.nombre}
+                          color="secondary"
+                          variant="outlined"
+                          sx={{ mt: 1 }}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+                </Stack>
+              </Paper>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Paper elevation={1} sx={{ p: 2, borderRadius: 2 }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
+                  Objetivos
+                </Typography>
+                {editando && permisosUsuario.campos.includes('objetivos') ? (
+                  <Stack spacing={2}>
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary">Objetivo General</Typography>
+                      <TextField
+                        fullWidth
+                        multiline
+                        rows={2}
+                        value={form.objetivos?.general || ""}
+                        onChange={(e) => handleObjetivoChange('general', null, e.target.value)}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary">Objetivos Específicos</Typography>
+                      {form.objetivos?.especificos?.map((obj, index) => (
+                        <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                          <TextField
+                            fullWidth
+                            value={obj}
+                            onChange={(e) => handleObjetivoChange('especifico', index, e.target.value)}
+                            variant="outlined"
+                            size="small"
+                          />
+                          <IconButton
+                            color="error"
+                            onClick={() => removeObjetivoEspecifico(index)}
+                            size="small"
+                          >
+                            <RemoveIcon />
+                          </IconButton>
+                        </Box>
+                      ))}
+                      <Button
+                        startIcon={<AddIcon />}
+                        onClick={addObjetivoEspecifico}
+                        sx={{ mt: 1 }}
+                      >
+                        Agregar Objetivo
+                      </Button>
+                    </Box>
+                  </Stack>
+                ) : (
+                  <Stack spacing={2}>
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary">Objetivo General</Typography>
+                      <Typography>{proyecto.objetivos?.general || "No especificado"}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary">Objetivos Específicos</Typography>
+                      <Stack spacing={1}>
+                        {proyecto.objetivos?.especificos?.map((obj, index) => (
+                          <Typography key={index}>• {obj}</Typography>
+                        ))}
+                      </Stack>
+                    </Box>
+                  </Stack>
+                )}
+              </Paper>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Paper elevation={1} sx={{ p: 2, borderRadius: 2 }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
+                  Cronograma
+                </Typography>
+                {editando && permisosUsuario.puedeAgregarHitos && (
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                      Nuevos Hitos
+                    </Typography>
+                    {form.nuevosHitos?.map((hito, index) => (
+                      <Paper
+                        key={index}
+                        elevation={1}
+                        sx={{ p: 2, mb: 2, borderRadius: 2 }}
+                      >
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} md={6}>
+                            <TextField
+                              fullWidth
+                              label="Nombre del Hito"
+                              value={hito.nombre}
+                              onChange={(e) => handleHitoChange(index, 'nombre', e.target.value)}
+                              size="small"
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={6}>
+                            <TextField
+                              fullWidth
+                              type="date"
+                              label="Fecha"
+                              value={hito.fecha}
+                              onChange={(e) => handleHitoChange(index, 'fecha', e.target.value)}
+                              size="small"
+                              InputLabelProps={{ shrink: true }}
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={6}>
+                            <Button
+                              component="label"
+                              variant="outlined"
+                              startIcon={<ImageIcon />}
+                              fullWidth
+                            >
+                              Subir Imagen
+                              <input
+                                type="file"
+                                hidden
+                                accept="image/*"
+                                onChange={(e) => handleFileChange(index, 'imagen', e)}
+                              />
+                            </Button>
+                          </Grid>
+                          <Grid item xs={12} md={6}>
+                            <Button
+                              component="label"
+                              variant="outlined"
+                              startIcon={<DescriptionIcon />}
+                              fullWidth
+                            >
+                              Subir Documento
+                              <input
+                                type="file"
+                                hidden
+                                accept=".pdf,.doc,.docx"
+                                onChange={(e) => handleFileChange(index, 'documento', e)}
+                              />
+                            </Button>
+                          </Grid>
+                        </Grid>
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                          <IconButton
+                            color="error"
+                            onClick={() => removeHito(index)}
+                            size="small"
+                          >
+                            <RemoveIcon />
+                          </IconButton>
+                        </Box>
+                      </Paper>
+                    ))}
+                    <Button
+                      startIcon={<AddIcon />}
+                      onClick={addHito}
+                      sx={{ mt: 1 }}
+                    >
+                      Agregar Hito
+                    </Button>
+                  </Box>
+                )}
+                <Grid container spacing={2}>
+                  {proyecto.hitosFormateados.map((hito, index) => (
+                    <Grid item xs={12} sm={6} md={4} key={index}>
+                      <Card sx={{ height: '100%' }}>
+                        {hito.imagen && (
+                          <CardMedia
+                            component="img"
+                            height="140"
+                            image={hito.imagen}
+                            alt={hito.nombre}
+                          />
+                        )}
+                        <CardContent>
+                          <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                            {hito.nombre}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                            Fecha: {hito.fechaFormateada}
+                          </Typography>
+                          {hito.documento && (
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              startIcon={<DescriptionIcon />}
+                              href={hito.documento}
+                              target="_blank"
+                              sx={{ mt: 1 }}
+                            >
+                              Ver Documento
+                            </Button>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Paper>
+            </Grid>
+
+            {editando && (
+              <Grid item xs={12}>
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => setEditando(false)}
+                    startIcon={<CancelIcon />}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleGuardar}
+                    startIcon={<SaveIcon />}
+                  >
+                    Guardar Cambios
+                  </Button>
+                </Box>
+              </Grid>
+            )}
+          </Grid>
+        </Paper>
+      </Box>
+
+      <Dialog
+        open={confirmarEliminar}
+        onClose={() => setConfirmarEliminar(false)}
+      >
+        <DialogTitle>Confirmar Eliminación</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Estás seguro de que deseas eliminar este proyecto? Esta acción no se puede deshacer.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmarEliminar(false)}>Cancelar</Button>
+          <Button onClick={handleEliminar} color="error" variant="contained">
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Layout>
   );
 };
 
