@@ -6,12 +6,14 @@ import { auth, db } from '../../../config/firebase';
 import './Login.css';
 
 export default function Login() {
+  // Estados para campos del formulario y errores
   const [email, setEmail] = useState('');
   const [clave, setClave] = useState('');
   const [mostrarClave, setMostrarClave] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Función para login con correo/clave
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -19,14 +21,14 @@ export default function Login() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, clave);
       const user = userCredential.user;
-
-      navigate('/dashboard');
+      navigate('/dashboard'); // Redirige al dashboard
     } catch (err) {
       console.error(err);
       setError('Correo o clave incorrectos');
     }
   };
 
+  // Función para login con Google
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
 
@@ -34,7 +36,7 @@ export default function Login() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Verificar si el usuario ya existe en Firestore
+      // Guarda en Firestore si es nuevo
       const userRef = doc(db, 'users', user.uid);
       const userSnap = await getDoc(userRef);
 
@@ -54,11 +56,12 @@ export default function Login() {
   };
 
   return (
-    <div className="login-container">
-      <h2>Iniciar Sesión</h2>
-      {error && <p className="error-message">{error}</p>}
+    <div className="login-container"> {/* Contenedor principal con estilo centralizado */}
+      <h2>Iniciar Sesión</h2> {/* Título del formulario */}
 
-      <form onSubmit={handleSubmit}>
+      {error && <p className="error-message">{error}</p>} {/* Mensaje de error visible si ocurre */}
+
+      <form onSubmit={handleSubmit}> {/* Formulario de login */}
         <input
           type="email"
           placeholder="Correo electrónico"
@@ -67,7 +70,7 @@ export default function Login() {
           required
         />
 
-        <div className="password-field">
+        <div className="password-field"> {/* Campo de contraseña con botón de mostrar/ocultar */}
           <input
             type={mostrarClave ? 'text' : 'password'}
             placeholder="Clave"
@@ -84,14 +87,20 @@ export default function Login() {
           </button>
         </div>
 
-        <button type="submit">Ingresar</button>
+        <button type="submit">Ingresar</button> {/* Botón principal de ingreso */}
       </form>
 
-      <button type="button" onClick={handleGoogleLogin} className="google-button">
+      <button
+        type="button"
+        onClick={handleGoogleLogin}
+        className="google-button"
+      >
         Iniciar sesión con Google
-      </button>
+      </button> {/* Botón alternativo para login con Google */}
 
-      <p>¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link></p>
+      <p>
+        ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
+      </p> {/* Enlace de registro */}
     </div>
   );
 }
