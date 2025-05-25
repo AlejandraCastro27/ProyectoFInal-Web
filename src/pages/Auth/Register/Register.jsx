@@ -6,6 +6,7 @@ import { auth, db } from '../../../config/firebase';
 import './Register.css';
 
 export default function Register() {
+  // Estados para cada campo del formulario
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [email, setEmail] = useState('');
@@ -19,6 +20,7 @@ export default function Register() {
   const [mensaje, setMensaje] = useState('');
   const navigate = useNavigate();
 
+  // Envía el formulario de registro
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -28,6 +30,7 @@ export default function Register() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, clave);
       const user = userCredential.user;
 
+      // Construye los datos del usuario para Firestore
       const data = {
         id: user.uid,
         email,
@@ -48,6 +51,7 @@ export default function Register() {
 
       await setDoc(doc(db, 'users', user.uid), data);
 
+      // Muestra mensaje y redirige después de unos segundos
       setMensaje('Cuenta creada con éxito. Redirigiendo...');
       setTimeout(() => {
         navigate('/login');
@@ -63,11 +67,14 @@ export default function Register() {
   };
 
   return (
-    <div className="register-container">
-      <h2>Registro de Usuario</h2>
+    <div className="register-container"> {/* Contenedor principal del formulario */}
+      <h2>Registro de Usuario</h2> {/* Título de la página */}
+
+      {/* Mensaje de error y éxito */}
       {error && <p className="error-message">{error}</p>}
       {mensaje && <p className="success-message">{mensaje}</p>}
-      <form onSubmit={handleSubmit}>
+
+      <form onSubmit={handleSubmit}> {/* Formulario de registro */}
         <input
           type="text"
           placeholder="Nombre"
@@ -89,7 +96,8 @@ export default function Register() {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <div className="password-field">
+
+        <div className="password-field"> {/* Campo para clave con opción de ver/ocultar */}
           <input
             type={verClave ? 'text' : 'password'}
             placeholder="Clave"
@@ -101,10 +109,13 @@ export default function Register() {
             {verClave ? 'Ocultar' : 'Ver'}
           </button>
         </div>
+
         <select value={rol} onChange={(e) => setRol(e.target.value)} required>
           <option value="">Selecciona un rol</option>
           <option value="estudiante">Estudiante</option>
         </select>
+
+        {/* Muestra campo de grado solo si es estudiante */}
         {rol === 'estudiante' && (
           <input
             type="number"
@@ -114,6 +125,7 @@ export default function Register() {
             required
           />
         )}
+
         <input
           type="text"
           placeholder="Institución"
@@ -127,9 +139,14 @@ export default function Register() {
           value={telefono}
           onChange={(e) => setTelefono(e.target.value)}
         />
-        <button type="submit">Registrarse</button>
+
+        <button type="submit">Registrarse</button> {/* Botón de registro */}
       </form>
-      <p>¿Ya tienes cuenta? <Link to="/login">Inicia sesión aquí</Link></p>
+
+      {/* Enlace para ir a iniciar sesión */}
+      <p>
+        ¿Ya tienes cuenta? <Link to="/login">Inicia sesión aquí</Link>
+      </p>
     </div>
   );
 }
