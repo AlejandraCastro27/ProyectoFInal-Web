@@ -1,12 +1,58 @@
-# React + Vite
+Proyecto Final - Programación Web
+Descripción:
+Aplicación web para el registro y seguimiento de proyectos escolares de investigación tipo Ondas Colciencias, con gestión de usuarios, proyectos, hitos y reportes.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Tecnologías
+React.js + Material UI
 
-Currently, two official plugins are available:
+Firebase (Firestore y Storage)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+React Router
 
-## Expanding the ESLint configuration
+Chart.js
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+jsPDF
+
+Funcionalidades principales
+Registro e inicio de sesión para estudiantes, docentes y coordinadores.
+
+Gestión completa de proyectos con objetivos, cronograma, presupuesto e integrantes.
+
+Registro y seguimiento de hitos con documentos y fotos.
+
+Control de estados y reportes en PDF.
+
+Búsqueda y filtrado de proyectos.
+
+Instalación
+bash
+Copiar
+Editar
+git clone https://github.com/AlejandraCastro27/ProyectoFInal-Web.git
+cd ProyectoFInal-Web
+npm install
+npm run dev
+Configurar credenciales Firebase en config/firebase.js
+
+Estructura básica
+/src/components - Componentes React
+
+/src/pages - Vistas y páginas
+
+/src/context - Contextos para estado global
+
+/src/services - Comunicación con Firebase
+
+/src/config/firebase.js - Configuración Firebase
+
+Base de datos (Firestore)
+users (usuarios con rol y datos)
+
+projects (datos del proyecto)
+
+milestones (hitos con documentos y fotos)
+
+project_history (historial de estados)
+
+Contacto
+Para dudas o colaboración: Maleja2023 - AlejandraCastro27
