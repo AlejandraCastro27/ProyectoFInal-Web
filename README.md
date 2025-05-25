@@ -102,11 +102,14 @@ Asignación de calificaciones
 Generación de reportes
 
 Para coordinadores
+
 Gestión completa de usuarios
-
 Cambio de estados de proyectos
-
 Visualización de métricas globales
+
+🌐 Despliegue
+La aplicación está disponible en: Enlace de producción: https://proyecto-f-inal-web.vercel.app/login
+
 
 Contacto
 Para dudas o colaboración: Maleja2023 - AlejandraCastro27
