@@ -1,79 +1,112 @@
-*Proyecto Final - Gestión de Proyectos Escolares*
+📚 Proyecto Final - Gestión de Proyectos Escolares
+MERN Stack
+Firebase
+Responsive
 
-Descripción
-Aplicación web para el registro y seguimiento de proyectos escolares de investigación, con funcionalidades para estudiantes, docentes y coordinadores. Desarrollado con el stack MERN (MongoDB, Express, React, Node.js) y Firebase.
+Plataforma web para el registro, seguimiento y evaluación de proyectos escolares de investigación, diseñada para estudiantes, docentes y coordinadores.
 
-Tecnologías
-Frontend: React.js, Material-UI (MUI)
+🚀 Características principales
+Roles de usuario: Accesos diferenciados para estudiantes, docentes y coordinadores
 
-Backend: Node.js, Express.js
+Gestión completa: Desde formulación hasta evaluación final de proyectos
 
-Base de datos: Firebase Firestore
+Seguimiento en tiempo real: Registro de hitos con evidencias multimedia
 
-Autenticación: Firebase Auth
+Reportes automatizados: Generación de documentos PDF con un clic
 
-Otras librerías: Chart.js, jsPDF, react-router-dom
+Notificaciones: Alertas sobre cambios importantes en los proyectos
 
-Instalación
-Clonar el repositorio:
+🛠 Tecnologías utilizadas
+Frontend
+Tecnología	Uso
+React.js	Librería principal
+Material-UI (MUI)	Componentes UI
+Chart.js	Visualización de datos
+react-router-dom	Navegación
+Backend
+Tecnología	Uso
+Node.js	Entorno de ejecución
+Express.js	Framework backend
+Firebase Auth	Autenticación
+Firestore	Base de datos NoSQL
+Utilidades
+jsPDF: Generación de reportes en PDF
+
+react-chartjs-2: Gráficos y estadísticas
+
+Firebase Storage: Almacenamiento de archivos
+
+⚙️ Instalación y configuración
+Clonar repositorio
 
 bash
 git clone https://github.com/AlejandraCastro27/ProyectoFInal-Web.git
 cd ProyectoFInal-Web
-Instalar dependencias:
+Instalar dependencias
 
 bash
 npm install
 npm install @mui/material @emotion/react @emotion/styled @mui/icons-material react-router-dom firebase
 npm install react-chartjs-2 chart.js
 npm install jspdf jspdf-autotable
-Configurar variables de entorno:
-Crear un archivo .env.local con las credenciales de Firebase.
+Configurar variables de entorno
+Crear archivo .env.local en la raíz del proyecto con:
 
-Iniciar la aplicación:
+env
+VITE_FIREBASE_API_KEY=tu_api_key
+VITE_FIREBASE_AUTH_DOMAIN=tu_dominio.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=tu_project_id
+VITE_FIREBASE_STORAGE_BUCKET=tu_bucket.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=tu_sender_id
+VITE_FIREBASE_APP_ID=tu_app_id
+Iniciar aplicación
 
 bash
 npm run dev
-
-Estructura del Proyecto
+📂 Estructura del proyecto
 src/
 ├── components/    # Componentes reutilizables
+│   ├── auth/      # Formularios de autenticación
+│   ├── projects/  # Componentes de gestión de proyectos
+│   └── ui/        # Componentes de interfaz
 ├── config/        # Configuración de Firebase
-├── context/       # Contextos de React
+├── context/       # Contextos de React (Auth, Projects)
 ├── hooks/         # Hooks personalizados
-├── pages/         # Páginas principales
-├── routes/        # Configuración de rutas
+├── pages/         # Vistas principales
+│   ├── Admin/     # Panel de administración
+│   ├── Auth/      # Páginas de autenticación
+│   └── Projects/  # Gestión de proyectos
+├── routes/        # Configuración de enrutamiento
 ├── services/      # Lógica de servicios
 └── utils/         # Utilidades y constantes
-Funcionalidades Principales
-Gestión de usuarios (estudiantes, docentes, coordinadores)
+🔍 Funcionalidades clave
+Para todos los usuarios
+Autenticación segura con Firebase
 
-Creación y seguimiento de proyectos
+Visualización de proyectos asignados
+
+Registro de avances con evidencias
+
+Para estudiantes
+Creación de nuevos proyectos
 
 Registro de hitos y avances
 
-Visualización de proyectos con filtros
+Carga de documentos y fotos
 
-Generación de reportes en PDF
+Para docentes
+Aprobación de proyectos
 
-Cambio de estado de proyectos
+Asignación de calificaciones
 
-Base de Datos
-La aplicación utiliza Firebase Firestore con las siguientes colecciones principales:
+Generación de reportes
 
-users: Información de usuarios
+Para coordinadores
+Gestión completa de usuarios
 
-projects: Detalles de proyectos
+Cambio de estados de proyectos
 
-team_members: Integrantes de equipos
-
-milestones: Hitos y avances
-
-project_history: Historial de cambios
-
-Despliegue
-La aplicación está disponible en: 
-
+Visualización de métricas globales
 
 Contacto
 Para dudas o colaboración: Maleja2023 - AlejandraCastro27
